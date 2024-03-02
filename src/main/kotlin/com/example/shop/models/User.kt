@@ -3,17 +3,20 @@ package com.example.shop.models
 import com.example.shop.models.logs.UserLogs
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 
 @Entity
 @Table(name = "user")
 data class User (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0,
+     var id: Long = 0,
     @Column(unique = true)
-    var username: String = "",
+    private var username: String = "",
     @Column(length = 60)
-    var passwordHash: String = "",
+    private var passwordHash: String = "",
     @Column(unique = true)
     var email: String = "",
     @Column(unique = true)
@@ -23,6 +26,8 @@ data class User (
 
     var employeeNumber: String? = "",
 
+
+    @Enumerated(EnumType.STRING)
     @ManyToOne
     var role : Role = Role(),
 
@@ -51,5 +56,34 @@ data class User (
     @JsonIgnore
     @OneToMany(mappedBy = "employee")
     val employeeShop : List<EmployeeShop> = arrayListOf(),
-)
+) : UserDetails {
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+        return mutableListOf(SimpleGrantedAuthority(role.roleName))
+    }
+
+    override fun getPassword(): String {
+        return passwordHash
+    }
+
+    override fun getUsername(): String {
+        return username
+    }
+
+    override fun isAccountNonExpired(): Boolean {
+        return true
+    }
+
+    override fun isAccountNonLocked(): Boolean {
+        return true
+    }
+
+    override fun isCredentialsNonExpired(): Boolean {
+        return true
+    }
+
+    override fun isEnabled(): Boolean {
+        return true
+    }
+
+}
 

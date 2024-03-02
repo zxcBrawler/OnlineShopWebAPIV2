@@ -35,7 +35,7 @@ class UserController (
     @PostMapping("")
     fun createUser(user: RegisterDTO): ResponseEntity<User> {
         // Create a new User instance
-        val newUser = User()
+
 
         // Retrieve the existing gender from the repository based on the user's gender ID
         val existingGender = categoryClothesRepository.findById(user.gender.toLong()).orElse(null)
@@ -43,17 +43,14 @@ class UserController (
         // Retrieve the existing role from the repository based on the user's role ID
         val existingRole = roleRepository.findById(user.role.toLong()).orElse(null)
 
+
+        val newUser = User(username = user.username, passwordHash = userService.setPassword(user.passwordHash))
         // Set the properties of the new user
-        newUser.username = user.username
         newUser.role = existingRole
         newUser.gender = existingGender
         newUser.email = user.email
         newUser.employeeNumber = user.employeeNumber
         newUser.phoneNumber = user.phoneNumber
-
-        // Hash the password using BCrypt and set it in the new user
-        newUser.passwordHash = BCrypt.hashpw(user.passwordHash, BCrypt.gensalt())
-
         // Set the profile photo of the new user
         newUser.profilePhoto = user.profilePhoto
 
@@ -90,12 +87,12 @@ class UserController (
         val existingRole = roleRepository.findById(user.role.toLong()).orElse(null)
 
         // Check if the provided password is different from the existing user's password
-        val newPassword = if (user.passwordHash != existingUser.passwordHash){
+        val newPassword = if (user.passwordHash != existingUser.password){
             // If different, hash the new password using BCrypt
-            BCrypt.hashpw(user.passwordHash, BCrypt.gensalt())
+            userService.setPassword(user.passwordHash)
         } else {
             // If the passwords are the same, use the existing password
-            existingUser.passwordHash
+            existingUser.password
         }
 
         // Create an updated user object with the new information

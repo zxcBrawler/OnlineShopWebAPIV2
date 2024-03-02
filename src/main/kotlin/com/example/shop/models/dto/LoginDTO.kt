@@ -2,7 +2,7 @@ package com.example.shop.models.dto
 
 class
 LoginDTO {
-    var email = ""
+    var username = ""
     var passwordHash = ""
     var accessToken = ""
 }

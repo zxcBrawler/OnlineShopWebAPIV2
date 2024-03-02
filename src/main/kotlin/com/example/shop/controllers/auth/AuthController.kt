@@ -1,5 +1,6 @@
 package com.example.shop.controllers.auth
 
+import com.example.shop.config.JwtService
 import com.example.shop.models.Role
 import com.example.shop.models.User
 import com.example.shop.models.dto.LoginDTO
@@ -19,6 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -26,63 +31,68 @@ import java.util.*
 @RequestMapping(value = ["/api/auth"])
 class AuthController (private val userService: UserService,
                       @Autowired private val categoryClothesRepository: CategoryClothesRepository,
-    @Autowired private val roleRepository: RoleRepository
+    @Autowired private val roleRepository: RoleRepository,
+    private val jwtService: JwtService,
+    private val authenticationManager : AuthenticationManager,
+    private val passwordEncoder: PasswordEncoder
     ) {
 
     @PostMapping("/register")
-    fun register(body: RegisterDTO) : ResponseEntity<User> {
+    fun register(@RequestBody body: RegisterDTO) : ResponseEntity<User> {
         val existingGender = categoryClothesRepository.findById(body.gender.toLong()).orElse(null)
-        val user = User()
+        val user = User(username = body.username, passwordHash = passwordEncoder.encode(body.passwordHash))
         val buyerRole = roleRepository.findById(4).orElse(null)
-        user.username = body.username
         user.email = body.email
         user.phoneNumber = body.phoneNumber
         user.profilePhoto = body.profilePhoto
         user.gender = existingGender
-        user.passwordHash = body.passwordHash
         user.role = buyerRole
-        user.passwordHash = userService.setPassword(user)
         user.employeeNumber = body.employeeNumber
         return ResponseEntity.ok(this.userService.saveUser(user))
     }
 
     @PostMapping("/login")
-    fun login(body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
+    fun login(@RequestBody body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
         val loginResponse = LoginResponse()
-        val user = this.userService.findByEmail(body.email)
+        val user = this.userService.findByUsername(body.username)
             ?: return ResponseEntity.badRequest().body(Message("user not found"))
 
-        if(!this.userService.comparePassword(body.passwordHash, user)){
+        if(!this.userService.comparePassword(body.passwordHash, user.get())){
             return ResponseEntity.badRequest().body(Message("Invalid password"))
         }
 
-//       val issuer = user.id.toString()
-//        val jwt = Jwts.builder()
-//            .setIssuer(issuer)
-//            .setExpiration(Date(System.currentTimeMillis() + 60 * 24 * 1000)) //1 day
-//            .signWith(SignatureAlgorithm.HS512, "secret").compact()
-//        val cookie = Cookie("jwt", jwt)
-//        cookie.isHttpOnly = true
+       val jwt = jwtService.generateToken(user.get())
+        val cookie = Cookie("jwt",jwt)
+        cookie.isHttpOnly = true
+        loginResponse.user = user.get()
+        loginResponse.accessToken = jwt
+        response.addCookie(cookie)
 
-        loginResponse.user = user
-       // loginResponse.accessToken = jwt
-
-       // response.addCookie(cookie)
         return ResponseEntity.ok(loginResponse)
     }
 
     @PostMapping("/changePassword")
-    fun changePassword(email : String, newPassword : String) : ResponseEntity<Any>{
-        val user = this.userService.findByEmail(email)
-            ?: return ResponseEntity.badRequest().body(Message("user not found"))
+    fun changePassword(@RequestParam username: String, @RequestParam newPassword: String): ResponseEntity<Any> {
+        val userOptional = userService.findByUsername(username)
 
-        user.passwordHash = newPassword
+        if (userOptional != null) {
+            if (userOptional.isEmpty) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Message("User not found"))
+            }
+        }
 
-        val newUser = user.copy(
-            passwordHash = userService.setPassword(user)
-        )
-        userService.saveUser(newUser)
+        try {
+            val user = userOptional?.get()
+            val updatedUser = user?.copy(passwordHash = userService.setPassword(newPassword))
+            if (updatedUser != null) {
+                userService.saveUser(updatedUser)
+            }
 
-        return ResponseEntity(HttpStatus.OK)
+            return ResponseEntity.ok().build()
+        } catch (e: Exception) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Message("Failed to update password"))
+        }
     }
+
 }

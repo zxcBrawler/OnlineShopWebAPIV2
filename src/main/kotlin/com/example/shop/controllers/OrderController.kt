@@ -2,6 +2,7 @@ package com.example.shop.controllers
 
 import com.example.shop.models.Order
 import com.example.shop.models.dto.OrderDTO
+import com.example.shop.models.dto.StatusDTO
 import com.example.shop.repositories.OrdersRepository
 import com.example.shop.repositories.StatusOrderRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,17 +48,17 @@ class OrderController (
     }
 
     @PutMapping("/{id}")
-    fun updateOrdersById(@PathVariable("id") ordersId: Long, @RequestBody orders: Order): ResponseEntity<Order> {
+    fun updateOrdersById(@PathVariable("id") ordersId: Long, status : StatusDTO): ResponseEntity<Order> {
 
         val existingOrders = ordersRepository.findById(ordersId).orElse(null)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
 
+        val existingStatus = statusOrderRepository.findById(status.statusID.toLong()).orElse(null);
+
         val updatedOrders = existingOrders.copy(
-            timeOrder = orders.timeOrder,
-            dateOrder = orders.dateOrder,
-            sumOrder = orders.sumOrder,
-            currentStatus = orders.currentStatus,
-            numberOrder = orders.numberOrder)
+
+            currentStatus = existingStatus,
+            )
         ordersRepository.save(updatedOrders)
 
         return ResponseEntity(updatedOrders, HttpStatus.OK)
