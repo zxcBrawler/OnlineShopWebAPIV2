@@ -27,7 +27,7 @@ class OrderController (
     @PostMapping("")
     fun createOrders(orders: OrderDTO): ResponseEntity<Order> {
         val order = Order()
-        val generateNumber = Random().nextInt(1,999)
+        val generateNumber = Random().nextInt(999)
         val generatedOrderNumber = (generateNumber + Calendar.YEAR + Calendar.MONTH + Calendar.DAY_OF_YEAR).toString()
         val currentStatus = statusOrderRepository.findById(1).orElse(null)
 
@@ -53,7 +53,7 @@ class OrderController (
         val existingOrders = ordersRepository.findById(ordersId).orElse(null)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
 
-        val existingStatus = statusOrderRepository.findById(status.statusID.toLong()).orElse(null);
+        val existingStatus = statusOrderRepository.findById(status.statusID.toLong()).orElse(null)
 
         val updatedOrders = existingOrders.copy(
 

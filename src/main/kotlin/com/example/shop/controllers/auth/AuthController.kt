@@ -27,13 +27,13 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping(value = ["/api/auth"])
 class AuthController (private val userService: UserService,
                       @Autowired private val categoryClothesRepository: CategoryClothesRepository,
     @Autowired private val roleRepository: RoleRepository,
     private val jwtService: JwtService,
-    private val authenticationManager : AuthenticationManager,
     private val passwordEncoder: PasswordEncoder
     ) {
 
@@ -52,7 +52,7 @@ class AuthController (private val userService: UserService,
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
+    fun login(body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
         val loginResponse = LoginResponse()
         val user = this.userService.findByUsername(body.username)
             ?: return ResponseEntity.badRequest().body(Message("user not found"))
@@ -76,7 +76,7 @@ class AuthController (private val userService: UserService,
         val userOptional = userService.findByUsername(username)
 
         if (userOptional != null) {
-            if (userOptional.isEmpty) {
+            if (userOptional.toString().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Message("User not found"))
             }
         }

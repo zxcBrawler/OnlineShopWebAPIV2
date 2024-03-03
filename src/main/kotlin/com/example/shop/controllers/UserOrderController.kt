@@ -44,7 +44,7 @@ class UserOrderController(
         val deliveryInfo = DeliveryInfo()
 
 
-        val generateNumber = Random().nextInt(1,99999)
+        val generateNumber = Random().nextInt(99999)
         val generatedOrderNumber = generateNumber.toString() + Calendar.YEAR.toString() + Calendar.MONTH.toString() + Calendar.DAY_OF_YEAR.toString()
         val currentStatus = statusOrderRepository.findById(1).orElse(null)
         val userCard = userCardRepository.findById(userOrder.userCardId).orElse(null)

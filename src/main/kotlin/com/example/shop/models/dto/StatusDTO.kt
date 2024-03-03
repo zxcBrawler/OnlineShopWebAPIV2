@@ -1,5 +1,5 @@
 package com.example.shop.models.dto
 
 class StatusDTO {
-    var statusID = 0;
+    var statusID = 0
 }
