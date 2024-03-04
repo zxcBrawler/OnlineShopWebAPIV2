@@ -27,8 +27,6 @@ class ShopGarnishController (@Autowired private val shopGarnishRepository: ShopG
         return ResponseEntity(existingShopGarnish, HttpStatus.OK)
     }
 
-
-
     @DeleteMapping("/{id}")
     fun deleteShopGarnishById(@PathVariable("id") shopGarnishId: Long): ResponseEntity<ShopGarnish> {
         if (!shopGarnishRepository.existsById(shopGarnishId)) {

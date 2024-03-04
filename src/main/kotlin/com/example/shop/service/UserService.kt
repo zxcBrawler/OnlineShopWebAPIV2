@@ -11,7 +11,6 @@ class UserService (private val userRepository: UserRepository) {
     fun saveUser(user : User): User {
         return this.userRepository.save(user)
     }
-
     fun findByUsername(username: String): Optional<User>?{
         return this.userRepository.findByUsername(username)
     }

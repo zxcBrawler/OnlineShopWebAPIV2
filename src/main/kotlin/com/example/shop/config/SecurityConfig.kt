@@ -21,19 +21,37 @@ class SecurityConfig(
     @Throws(Exception::class)
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-
+            // Disable CSRF protection for this application
             .csrf { it.disable() }
+
+            // Configure authorization rules for different endpoints
             .authorizeHttpRequests {
                 it
+                    // Allow unrestricted access to the login and register endpoint
                     .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/register").permitAll()
+
+                    // Allow unrestricted access to the Prometheus actuator endpoint
                     .requestMatchers("/actuator/prometheus").permitAll()
+
+                    // TODO: handle other api endpoints based on each role here
+
+                    // Require authentication for any other request
                     .anyRequest().authenticated()
             }
+
+            // Set session management to stateless, as JWTs are used for authentication
             .sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+
+            // Set the custom authentication provider
             .authenticationProvider(authenticationProvider)
+
+            // Add the custom JWT authentication filter before the default UsernamePasswordAuthenticationFilter
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+
+        // Build and return the configured SecurityFilterChain
         return http.build()
     }
 }
