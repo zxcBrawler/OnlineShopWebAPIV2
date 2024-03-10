@@ -12,10 +12,10 @@ data class ClothesSizeClothes(
     var id: Long = 0,
 
     @ManyToOne
-    val clothes: Clothes = Clothes(),
+    var clothes: Clothes = Clothes(),
 
     @ManyToOne
-    val sizeClothes: SizeClothes = SizeClothes(),
+    var sizeClothes: SizeClothes = SizeClothes(),
 
     @JsonIgnore
     @OneToMany(mappedBy = "sizeClothes")

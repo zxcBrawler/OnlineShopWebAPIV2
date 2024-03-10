@@ -9,15 +9,15 @@ data class Clothes(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val idClothes: Long = 0,
-    val nameClothesEn: String = "",
-    val nameClothesRu: String = "",
-    val priceClothes: String = "",
+    var nameClothesEn: String = "",
+    var nameClothesRu: String = "",
+    var priceClothes: String = "",
     val clothesPhoto: String = "",
-    val barcode: String = "",
+    var barcode: String = "",
 
 
     @ManyToOne
-    val typeClothes: TypeClothes = TypeClothes(),
+    var typeClothes: TypeClothes = TypeClothes(),
     @JsonIgnore
     @OneToMany(mappedBy = "clothes")
     var clothesList : List<ClothesColors> = arrayListOf(),
@@ -28,4 +28,4 @@ data class Clothes(
     @OneToMany(mappedBy = "clothesComp")
     var clothesComp : List<OrderComposition> = arrayListOf(),
 
-)
+    )

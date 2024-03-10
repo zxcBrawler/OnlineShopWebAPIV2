@@ -2,6 +2,7 @@ package com.example.shop.controllers
 
 import com.example.shop.models.User
 import com.example.shop.models.dto.RegisterDTO
+import com.example.shop.models.dto.UpdateUserDTO
 import com.example.shop.repositories.CategoryClothesRepository
 import com.example.shop.repositories.RoleRepository
 import com.example.shop.repositories.UserRepository
@@ -74,7 +75,7 @@ class UserController (
              * @param user The [RegisterDTO] containing the updated user information.
              * @return ResponseEntity<User> The response entity containing the updated user information.
              */
-    fun updateUserById(@PathVariable("id") userId: Long, user: RegisterDTO): ResponseEntity<User> {
+    fun updateUserById(@PathVariable("id") userId: Long, user: UpdateUserDTO): ResponseEntity<User> {
 
         // Retrieve the existing user from the repository based on the provided [userId]
         val existingUser = userRepository.findById(userId).orElse(null)
@@ -87,18 +88,12 @@ class UserController (
         val existingRole = roleRepository.findById(user.role.toLong()).orElse(null)
 
         // Check if the provided password is different from the existing user's password
-        val newPassword = if (user.passwordHash != existingUser.password){
-            // If different, hash the new password using BCrypt
-            userService.setPassword(user.passwordHash)
-        } else {
-            // If the passwords are the same, use the existing password
-            existingUser.password
-        }
+
 
         // Create an updated user object with the new information
         val updatedUser = existingUser.copy(
             username = user.username,
-            passwordHash = newPassword,
+
             phoneNumber = user.phoneNumber,
             profilePhoto = user.profilePhoto,
             email = user.email,

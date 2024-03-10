@@ -54,7 +54,7 @@ class AuthController (
      * @return ResponseEntity<User> Returns the newly registered user along with an HTTP status.
      */
     @PostMapping("/register")
-    fun register(@RequestBody body: RegisterDTO) : ResponseEntity<User> {
+    fun register(body: RegisterDTO) : ResponseEntity<User> {
         // Fetch the existing gender from the repository based on the provided gender ID
         val existingGender = categoryClothesRepository.findById(body.gender.toLong()).orElse(null)
 
@@ -86,7 +86,7 @@ class AuthController (
      * @return ResponseEntity<Any> Returns the login response containing user details and JWT token along with an HTTP status.
      */
     @PostMapping("/login")
-    fun login(body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
+    fun login( body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
         // Create a new login response object
         val loginResponse = LoginResponse()
 

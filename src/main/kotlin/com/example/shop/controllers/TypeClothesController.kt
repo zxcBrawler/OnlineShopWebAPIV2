@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/typeClothes")
 class TypeClothesController(@Autowired private val typeClothesRepository: TypeClothesRepository) {

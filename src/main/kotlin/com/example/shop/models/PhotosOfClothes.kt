@@ -10,8 +10,8 @@ data class PhotosOfClothes (
     val id: Long = 0,
     //DONE
     @ManyToOne
-    val clothesId: Clothes = Clothes(),
+    var clothesId: Clothes = Clothes(),
     //DONE
     @ManyToOne
-    val clothesPhoto: ClothesPhoto = ClothesPhoto(),
+    var clothesPhoto: ClothesPhoto = ClothesPhoto(),
 )

@@ -11,7 +11,7 @@ data class ClothesPhoto(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     @Column(length = 500, unique = true)
-    val photoAddress: String = "",
+    var photoAddress: String = "",
     @JsonIgnore
     @OneToMany(mappedBy = "clothesPhoto")
     var clothesPhoto : List<PhotosOfClothes> = arrayListOf()
