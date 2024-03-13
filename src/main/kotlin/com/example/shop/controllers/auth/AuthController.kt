@@ -86,26 +86,35 @@ class AuthController (
      * @return ResponseEntity<Any> Returns the login response containing user details and JWT token along with an HTTP status.
      */
     @PostMapping("/login")
-    fun login( body: LoginDTO, response: HttpServletResponse) : ResponseEntity<Any>{
+    fun login( body: LoginDTO, response: HttpServletResponse) : ResponseEntity<LoginResponse>{
         // Create a new login response object
         val loginResponse = LoginResponse()
 
         // Find the user by the provided username
-        val user = this.userService.findByUsername(body.username)
-            ?: return ResponseEntity.badRequest().body(Message("user not found"))
+        val userOptional = this.userService.findByUsername(body.username)
 
-        // Check if the provided password matches the user's password
-        if (!this.userService.comparePassword(body.passwordHash, user.get())) {
-            return ResponseEntity.badRequest().body(Message("Invalid password"))
+        if (userOptional != null) {
+            if (userOptional.isEmpty) {
+                loginResponse.message = "user not found"
+                return ResponseEntity(loginResponse, HttpStatus.NOT_FOUND)
+            }
+        }
+
+        val user = userOptional?.get()
+
+// Check if the provided password matches the user's password
+        if (!this.userService.comparePassword(body.passwordHash, user!!)) {
+            loginResponse.message = "invalid password"
+            return ResponseEntity(loginResponse, HttpStatus.BAD_REQUEST)
         }
 
         // Generate a JWT token for the user
-        val jwt = jwtService.generateToken(user.get())
+        val jwt = user.let { jwtService.generateToken(it) }
 
         // Create an HTTP-only cookie with the JWT token and add it to the response
         val cookie = Cookie("jwt", jwt)
         cookie.isHttpOnly = true
-        loginResponse.user = user.get()
+        loginResponse.user = user
         loginResponse.accessToken = jwt
         response.addCookie(cookie)
 

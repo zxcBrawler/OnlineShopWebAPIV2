@@ -6,4 +6,5 @@ import com.example.shop.models.User
 class LoginResponse {
     var user = User()
     var accessToken = ""
+    var message  = ""
 }

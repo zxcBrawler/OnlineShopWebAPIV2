@@ -10,7 +10,7 @@ data class SizeClothes(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id : Long = 0,
     @Column(unique = true)
-    val nameSize: String = "",
+    var nameSize: String = "",
 
     @JsonIgnore
     @OneToMany(mappedBy = "sizeClothes")

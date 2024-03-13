@@ -10,9 +10,9 @@ data class Color(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val colorId: Long = 0,
     @Column(unique = true)
-    val nameColor: String = "",
+    var nameColor: String = "",
     @Column(unique = true)
-    val hex: String = "",
+    var hex: String = "",
 
     @JsonIgnore
     @OneToMany(mappedBy = "colors")

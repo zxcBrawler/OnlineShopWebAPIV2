@@ -1,6 +1,7 @@
 package com.example.shop.controllers
 
 import com.example.shop.models.SizeClothes
+import com.example.shop.models.dto.SizeDTO
 import com.example.shop.repositories.SizeClothesRepository
 import com.example.shop.repositories.UserOrderRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/sizeClothes")
 class SizeClothesController(@Autowired private val sizeClothesRepository: SizeClothesRepository)  {
@@ -16,8 +18,10 @@ class SizeClothesController(@Autowired private val sizeClothesRepository: SizeCl
         sizeClothesRepository.findAll().toList()
 
     @PostMapping("")
-    fun createSizeClothes(@RequestBody sizeClothes: SizeClothes): ResponseEntity<SizeClothes> {
-        val createdSizeClothes = sizeClothesRepository.save(sizeClothes)
+    fun createSizeClothes(sizeDTO: SizeDTO): ResponseEntity<SizeClothes> {
+        val newSize = SizeClothes()
+        newSize.nameSize = sizeDTO.nameSize
+        val createdSizeClothes = sizeClothesRepository.save(newSize)
         return ResponseEntity(createdSizeClothes, HttpStatus.CREATED)
     }
 

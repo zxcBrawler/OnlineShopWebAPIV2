@@ -1,6 +1,7 @@
 package com.example.shop.controllers
 
 import com.example.shop.models.Color
+import com.example.shop.models.dto.ColorDTO
 import com.example.shop.repositories.ColorRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/colors")
 class ColorController (@Autowired private val colorRepository: ColorRepository)  {
@@ -16,8 +18,11 @@ class ColorController (@Autowired private val colorRepository: ColorRepository) 
         colorRepository.findAll().toList()
 
     @PostMapping("")
-    fun createColors(@RequestBody colors: Color): ResponseEntity<Color> {
-        val createdColors = colorRepository.save(colors)
+    fun createColors(colorDTO: ColorDTO): ResponseEntity<Color> {
+        val newColor = Color()
+        newColor.nameColor = colorDTO.nameColor
+        newColor.hex = colorDTO.hex
+        val createdColors = colorRepository.save(newColor)
         return ResponseEntity(createdColors, HttpStatus.CREATED)
     }
 
