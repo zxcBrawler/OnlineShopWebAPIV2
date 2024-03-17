@@ -1,13 +1,11 @@
 package com.example.shop.controllers
 
+import com.example.shop.models.EmployeeShop
 import com.example.shop.models.User
 import com.example.shop.models.dto.RegisterDTO
 import com.example.shop.models.dto.UpdateUserDTO
-import com.example.shop.repositories.CategoryClothesRepository
-import com.example.shop.repositories.RoleRepository
-import com.example.shop.repositories.UserRepository
+import com.example.shop.repositories.*
 import com.example.shop.service.UserService
-import org.mindrot.jbcrypt.BCrypt
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,6 +18,8 @@ class UserController (
     @Autowired private val userRepository: UserRepository,
     @Autowired private val categoryClothesRepository: CategoryClothesRepository,
     @Autowired private val roleRepository: RoleRepository,
+    @Autowired private val employeeShopRepository: EmployeeShopRepository,
+    @Autowired private val shopAddressesRepository: ShopAddressesRepository,
     @Autowired private val userService: UserService) {
     @GetMapping("")
     fun getAllUsers(): List<User> =
@@ -34,15 +34,14 @@ class UserController (
      * @return ResponseEntity<User> The response entity containing the newly created user information.
      */
     @PostMapping("")
-    fun createUser(user: RegisterDTO): ResponseEntity<User> {
-        // Create a new User instance
-
-
+    fun createUser(user: RegisterDTO): ResponseEntity<Any> {
         // Retrieve the existing gender from the repository based on the user's gender ID
         val existingGender = categoryClothesRepository.findById(user.gender.toLong()).orElse(null)
 
         // Retrieve the existing role from the repository based on the user's role ID
         val existingRole = roleRepository.findById(user.role.toLong()).orElse(null)
+        // Retrieve the existing shop from repository based on shopAddressId in RegisterDTO
+        val existingShop = shopAddressesRepository.findById(user.shopAddressId.toLong()).orElse(null)
 
 
         val newUser = User(username = user.username, passwordHash = userService.setPassword(user.passwordHash))
@@ -55,8 +54,18 @@ class UserController (
         // Set the profile photo of the new user
         newUser.profilePhoto = user.profilePhoto
 
-        // Return the response entity with the newly created user information and HttpStatus.CREATED
-        return ResponseEntity.ok(this.userService.saveUser(newUser))
+        // Save new user
+        this.userService.saveUser(newUser)
+
+        // Create new instance of EmployeeShop class to add employee to shop where they work in
+        val newEmployee = EmployeeShop()
+        // Find newly added user by id
+        val addedUser = userRepository.findById(newUser.id).orElse(null)
+        // Set values
+        newEmployee.employee = addedUser
+        newEmployee.shopAddresses = existingShop
+
+        return ResponseEntity.ok(employeeShopRepository.save(newEmployee))
     }
 
 

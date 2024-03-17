@@ -12,5 +12,5 @@ class RegisterDTO {
     var passwordHash = ""
     var role = 0
     var employeeNumber = ""
-
+    var shopAddressId = 0
 }
