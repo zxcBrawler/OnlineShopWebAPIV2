@@ -3,6 +3,7 @@ package com.example.shop.config
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
@@ -20,8 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter
  */
 @Component
 class JwtAuthFilter(
-    private val jwtService: JwtService,
-    private val userDetailsService: UserDetailsService
+    @Autowired private val jwtService: JwtService,
+    @Autowired private val userDetailsService: UserDetailsService
 ) : OncePerRequestFilter() {
 
     /**
