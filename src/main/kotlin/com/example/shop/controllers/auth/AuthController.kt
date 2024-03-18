@@ -1,31 +1,28 @@
 package com.example.shop.controllers.auth
 
 import com.example.shop.config.JwtService
-import com.example.shop.models.Role
 import com.example.shop.models.User
 import com.example.shop.models.dto.LoginDTO
 
 import com.example.shop.models.dto.LoginResponse
 import com.example.shop.models.dto.Message
 import com.example.shop.models.dto.RegisterDTO
+import com.example.shop.models.logs.UserLogs
 import com.example.shop.repositories.CategoryClothesRepository
 import com.example.shop.repositories.RoleRepository
+import com.example.shop.repositories.UserLogsRepository
 import com.example.shop.service.UserService
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
-import org.mindrot.jbcrypt.BCrypt
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
-import java.util.*
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Controller for handling user authentication-related operations.
@@ -43,10 +40,12 @@ class AuthController (
     private val userService: UserService,
     @Autowired private val categoryClothesRepository: CategoryClothesRepository,
     @Autowired private val roleRepository: RoleRepository,
+    @Autowired private val userLogsRepository: UserLogsRepository,
     private val jwtService: JwtService,
-    private val passwordEncoder: PasswordEncoder
-) {
+    private val passwordEncoder: PasswordEncoder,
 
+) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
     /**
      * Handles user registration.
      *
@@ -54,7 +53,8 @@ class AuthController (
      * @return ResponseEntity<User> Returns the newly registered user along with an HTTP status.
      */
     @PostMapping("/register")
-    fun register(body: RegisterDTO) : ResponseEntity<User> {
+    fun register(
+       @RequestBody body: RegisterDTO) : ResponseEntity<User> {
         // Fetch the existing gender from the repository based on the provided gender ID
         val existingGender = categoryClothesRepository.findById(body.gender.toLong()).orElse(null)
 
@@ -65,7 +65,7 @@ class AuthController (
         )
         // registration only can be done for users with role id 4 which is role named 'buyer'
         val buyerRole = roleRepository.findById(4).orElse(null)
-
+        val userLogs = UserLogs()
         // Set additional details for the user
         user.email = body.email
         user.phoneNumber = body.phoneNumber
@@ -73,9 +73,17 @@ class AuthController (
         user.gender = existingGender
         user.role = buyerRole
         user.employeeNumber = body.employeeNumber
+        userService.saveUser(user)
+
+        logger.warn("New buyer with username ${user.username} has been registered")
+        userLogs.user = user
+        userLogs.timestamp = LocalDate.now().toString() + " " +
+         LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+        userLogs.description = "New user with username ${user.username} has been registered"
+        userLogsRepository.save(userLogs)
 
         // Save the user to the repository and return the response
-        return ResponseEntity.ok(this.userService.saveUser(user))
+        return ResponseEntity.ok(user)
     }
 
     /**
@@ -90,11 +98,21 @@ class AuthController (
         // Create a new login response object
         val loginResponse = LoginResponse()
 
+        val userLogs = UserLogs()
+
         // Find the user by the provided username
         val userOptional = this.userService.findByUsername(body.username)
 
         if (userOptional != null) {
             if (userOptional.isEmpty) {
+
+                logger.error("User with username ${body.username} has not been found")
+                userLogs.user = null
+                userLogs.timestamp = LocalDate.now().toString() + " " +
+                        LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                userLogs.description = "User with username ${body.username} has not been found"
+                userLogsRepository.save(userLogs)
+
                 loginResponse.message = "user not found"
                 return ResponseEntity(loginResponse, HttpStatus.NOT_FOUND)
             }
@@ -104,7 +122,17 @@ class AuthController (
 
 // Check if the provided password matches the user's password
         if (!this.userService.comparePassword(body.passwordHash, user!!)) {
+            logger.error("Invalid password for user ${body.username}")
+            userLogs.user = null
+            userLogs.timestamp = LocalDate.now().toString() + " " +
+                    LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            userLogs.description = "Invalid password for user ${body.username}"
+            userLogsRepository.save(userLogs)
+
+
             loginResponse.message = "invalid password"
+
+
             return ResponseEntity(loginResponse, HttpStatus.BAD_REQUEST)
         }
 
@@ -117,6 +145,13 @@ class AuthController (
         loginResponse.user = user
         loginResponse.accessToken = jwt
         response.addCookie(cookie)
+
+        logger.info("New login to account with username ${body.username}")
+        userLogs.user = loginResponse.user
+        userLogs.timestamp = LocalDate.now().toString() + " " +
+                LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+        userLogs.description = "New login to account with username ${body.username}"
+        userLogsRepository.save(userLogs)
 
         // Return the login response along with the HTTP status
         return ResponseEntity.ok(loginResponse)
@@ -132,27 +167,42 @@ class AuthController (
     @PostMapping("/changePassword")
     fun changePassword(@RequestParam username: String, @RequestParam newPassword: String): ResponseEntity<Any> {
         // Find the user by the provided username
-        val userOptional = userService.findByUsername(username)
-
+        val userOptional = userService.findByUsername(username)?.orElse(null)
+        val userLogs = UserLogs()
         // Check if the user exists
-        if (userOptional != null) {
-            if (userOptional.toString().isEmpty()) {
+        if (userOptional == null) {
+
+                logger.error("User with username $username has not been found")
+                userLogs.user = null
+                userLogs.timestamp = LocalDate.now().toString() + " " +
+                        LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                userLogs.description = "User with username $username has not been found"
+                userLogsRepository.save(userLogs)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Message("User not found"))
-            }
         }
 
         try {
             // Update the user's password and save it to the repository
-            val user = userOptional?.get()
-            val updatedUser = user?.copy(passwordHash = userService.setPassword(newPassword))
-            if (updatedUser != null) {
-                userService.saveUser(updatedUser)
-            }
+            val user = userOptional
+            val updatedUser = user.copy(passwordHash = userService.setPassword(newPassword))
+            logger.info("New password set for user with username ${updatedUser.username}")
+            userLogs.user = updatedUser
+            userLogs.timestamp = LocalDate.now().toString() + " " +
+                    LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            userLogs.description = "New password set for user with username ${updatedUser.username}"
+            userLogsRepository.save(userLogs)
+            userService.saveUser(updatedUser)
 
             // Return a response indicating successful password update
             return ResponseEntity.ok().build()
         } catch (e: Exception) {
             // Return a response indicating failure to update the password
+            logger.error("Failed to update password for user with username $username")
+            userLogs.user = null
+            userLogs.timestamp = LocalDate.now().toString() + " " +
+                    LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            userLogs.description = "Failed to update password for user with username $username"
+            userLogsRepository.save(userLogs)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Message("Failed to update password"))
         }
     }

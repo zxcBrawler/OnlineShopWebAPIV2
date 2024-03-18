@@ -9,12 +9,12 @@ import jakarta.persistence.*
 data class UserLogs(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
+    var id: Long = 0,
 
     @ManyToOne
-    var user: User,
+    var user: User? = User(),
 
-    var timestamp: String,
+    var timestamp: String = "",
 
-    var description: String,
+    var description: String = "",
 )

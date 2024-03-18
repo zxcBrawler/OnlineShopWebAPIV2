@@ -30,7 +30,7 @@ class SecurityConfig(
                     // Allow unrestricted access to the login and register endpoint
                     .requestMatchers("/api/auth/login").permitAll()
                     .requestMatchers("/api/auth/register").permitAll()
-
+                    .requestMatchers("/api/auth/changePassword").permitAll()
                     // Allow unrestricted access to the Prometheus actuator endpoint
                     .requestMatchers("/actuator/prometheus").permitAll()
 
