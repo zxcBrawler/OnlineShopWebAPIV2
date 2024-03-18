@@ -1,6 +1,7 @@
 version: '3.7'
 
 services:
+
   grafana:
     build: './config/grafana'
     ports:
@@ -27,5 +28,6 @@ services:
       monitoring:
         aliases:
           - prometheus
+
 networks:
   monitoring:
