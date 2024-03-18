@@ -1,6 +1,7 @@
 package com.example.shop.config
 
 import com.example.shop.repositories.UserRepository
+import com.example.shop.service.UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -18,7 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
  * @property userRepository The repository for user entities.
  */
 @Configuration
-class ApplicationConfig(private val userRepository: UserRepository) {
+class ApplicationConfig(private val userRepository: UserService) {
 
     /**
      * Provides a custom UserDetailsService implementation.
@@ -29,7 +30,7 @@ class ApplicationConfig(private val userRepository: UserRepository) {
     fun userDetailsService(): UserDetailsService {
         return UserDetailsService { username ->
             userRepository.findByUsername(username)
-                .orElseThrow { UsernameNotFoundException("User not found") }
+                ?.orElseThrow { UsernameNotFoundException("User not found") }
         }
     }
 
