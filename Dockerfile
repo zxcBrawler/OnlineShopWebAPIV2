@@ -1,8 +1,8 @@
-FROM maven:3.5-jdk-8-alpine AS build
+FROM maven:3.8.5-openjdk-17 AS build
 COPY . .
 RUN mvn clean package -DskipTests
 
-FROM openjdk:8-jre-alpine
+FROM openjdk:17.0.1-jdk-slim
 COPY --from=build /target/shop-0.0.1-SNAPSHOT.jar shop.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "shop.jar"]
