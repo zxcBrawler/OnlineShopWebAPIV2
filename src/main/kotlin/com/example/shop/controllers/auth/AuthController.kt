@@ -103,8 +103,8 @@ class AuthController (
         // Find the user by the provided username
         val userOptional = this.userService.findByUsername(body.username)
 
-        if (userOptional != null) {
-            if (userOptional.toString().isEmpty()) {
+        if (userOptional == null) {
+
 
                 logger.error("User with username ${body.username} has not been found")
                 userLogs.user = null
@@ -115,7 +115,7 @@ class AuthController (
 
                 loginResponse.message = "user not found"
                 return ResponseEntity(loginResponse, HttpStatus.NOT_FOUND)
-            }
+
         }
 
         val user = userOptional?.get()
