@@ -8,11 +8,11 @@ data class ShopAddresses(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val shopAddressId: Long = 0,
-    val shopAddressDirection: String = "", // where shop located exactly
-    val shopMetro: String = "", //closest metro station
-    val contactNumber: String = "", // contact info
-    val latitude: String = "",
-    val longitude: String = "",
+    var shopAddressDirection: String = "", // where shop located exactly
+    var shopMetro: String = "", //closest metro station
+    var contactNumber: String = "", // contact info
+    var latitude: String = "",
+    var longitude: String = "",
 
     @JsonIgnore
     @OneToMany(mappedBy = "shopAddresses")
@@ -24,4 +24,4 @@ data class ShopAddresses(
     @OneToMany(mappedBy = "shopAddresses", cascade = [CascadeType.ALL])
     val shopAddresses : List<EmployeeShop> = arrayListOf(),
 
-)
+    )

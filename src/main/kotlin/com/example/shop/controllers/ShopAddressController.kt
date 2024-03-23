@@ -1,6 +1,7 @@
 package com.example.shop.controllers
 
 import com.example.shop.models.ShopAddresses
+import com.example.shop.models.dto.ShopAddressDTO
 import com.example.shop.repositories.ShopAddressesRepository
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,19 +25,28 @@ class ShopAddressesController (@Autowired private val shopAddressesRepository: S
 
     //Admin only
     @PostMapping("")
-    fun createShopAddresses(@RequestBody shopAddresses: ShopAddresses): ResponseEntity<ShopAddresses> {
-        val createdShopAddresses = shopAddressesRepository.save(shopAddresses)
+    fun createShopAddresses(shopAddresses: ShopAddressDTO): ResponseEntity<ShopAddresses> {
+       val newShopAddress = ShopAddresses()
+        newShopAddress.shopMetro = shopAddresses.shopMetro
+        newShopAddress.shopAddressDirection = shopAddresses.shopAddressDirection
+        newShopAddress.contactNumber = shopAddresses.contactNumber
+        newShopAddress.latitude = shopAddresses.latitude
+        newShopAddress.longitude = shopAddresses.longitude
+        val createdShopAddresses = shopAddressesRepository.save(newShopAddress)
         return ResponseEntity(createdShopAddresses, HttpStatus.CREATED)
     }
     @PutMapping("/{id}")
-    fun updateShopAddressesById(@PathVariable("id") shopAddressesId: Long, @RequestBody shopAddresses: ShopAddresses): ResponseEntity<ShopAddresses> {
+    fun updateShopAddressesById(@PathVariable("id") shopAddressesId: Long, shopAddresses: ShopAddressDTO): ResponseEntity<ShopAddresses> {
 
         val existingShopAddresses = shopAddressesRepository.findById(shopAddressesId).orElse(null)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
 
         val updatedShopAddresses = existingShopAddresses.copy(
             shopAddressDirection = shopAddresses.shopAddressDirection,
-            shopMetro = shopAddresses.shopMetro)
+            shopMetro = shopAddresses.shopMetro,
+            contactNumber = shopAddresses.contactNumber,
+            latitude = shopAddresses.latitude,
+            longitude = shopAddresses.longitude)
         shopAddressesRepository.save(updatedShopAddresses)
         return ResponseEntity(updatedShopAddresses, HttpStatus.OK)
     }
