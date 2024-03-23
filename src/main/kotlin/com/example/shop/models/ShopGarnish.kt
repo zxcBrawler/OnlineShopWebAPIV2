@@ -11,15 +11,15 @@ data class ShopGarnish(
 
     //DONE
     @ManyToOne
-    val sizeClothesGarnish: ClothesSizeClothes = ClothesSizeClothes(),
+    var sizeClothesGarnish: ClothesSizeClothes = ClothesSizeClothes(),
 
     //DONE
     @ManyToOne
-    val colorClothesGarnish: ClothesColors = ClothesColors(),
+    var colorClothesGarnish: ClothesColors = ClothesColors(),
 
     //DONE
     @ManyToOne
-    val shopAddressesGarnish: ShopAddresses = ShopAddresses(),
+    var shopAddressesGarnish: ShopAddresses = ShopAddresses(),
 
-    val quantity: Int = 0,
+    var quantity: Int = 0,
 )

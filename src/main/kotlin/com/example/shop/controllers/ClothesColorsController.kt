@@ -26,7 +26,6 @@ class ClothesColorsController (
 
     @GetMapping("/{clothesId}")
     fun getClothesColorsByClothesId(@PathVariable("clothesId") clothesId: Long): ResponseEntity<Any> {
-
         val clothesColor = clothesColorsRepository.findAllByClothesIdClothes(clothesId)
         return ResponseEntity(clothesColor, HttpStatus.OK)
     }

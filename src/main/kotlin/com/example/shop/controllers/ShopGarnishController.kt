@@ -1,8 +1,8 @@
 package com.example.shop.controllers
 
-import com.example.shop.models.ShopGarnish
+import com.example.shop.models.*
 import com.example.shop.models.dto.ShopGarnishDTO
-import com.example.shop.repositories.ShopGarnishRepository
+import com.example.shop.repositories.*
 import jakarta.websocket.server.PathParam
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -12,14 +12,29 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/shopGarnish")
-class ShopGarnishController (@Autowired private val shopGarnishRepository: ShopGarnishRepository)  {
+class ShopGarnishController (@Autowired private val shopGarnishRepository: ShopGarnishRepository,
+
+    @Autowired private val clothesSizeClothesRepository: ClothesSizeClothesRepository,
+    @Autowired private val clothesColorsRepository: ClothesColorsRepository,
+    @Autowired private  val shopAddressesRepository: ShopAddressesRepository)  {
     @GetMapping("")
     fun getAllShopGarnish(): List<ShopGarnish> =
         shopGarnishRepository.findAll().toList()
 
     @PostMapping("")
-    fun createShopGarnish(@RequestBody shopGarnish: ShopGarnish): ResponseEntity<ShopGarnish> {
-        val createdShopGarnish = shopGarnishRepository.save(shopGarnish)
+    fun createShopGarnish( shopGarnish: ShopGarnishDTO): ResponseEntity<ShopGarnish> {
+        val newShopGarnish = ShopGarnish()
+
+        val existingShop = shopAddressesRepository.findById(shopGarnish.shopId.toLong()).orElse(null)
+        val existingColor = clothesColorsRepository.findById(shopGarnish.colorClothesId.toLong()).orElse(null)
+        val existingSize = clothesSizeClothesRepository.findById(shopGarnish.sizeClothesId.toLong()).orElse(null)
+
+        newShopGarnish.shopAddressesGarnish = existingShop
+        newShopGarnish.colorClothesGarnish = existingColor
+        newShopGarnish.sizeClothesGarnish = existingSize
+        newShopGarnish.quantity = shopGarnish.quantity
+
+        val createdShopGarnish = shopGarnishRepository.save(newShopGarnish)
         return ResponseEntity(createdShopGarnish, HttpStatus.CREATED)
     }
 
