@@ -54,7 +54,7 @@ class AuthController (
      */
     @PostMapping("/register")
     fun register(
-       @RequestBody body: RegisterDTO) : ResponseEntity<User> {
+       body: RegisterDTO) : ResponseEntity<User> {
         // Fetch the existing gender from the repository based on the provided gender ID
         val existingGender = categoryClothesRepository.findById(body.gender.toLong()).orElse(null)
 
