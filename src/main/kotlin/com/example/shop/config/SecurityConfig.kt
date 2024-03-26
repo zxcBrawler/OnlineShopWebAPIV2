@@ -32,7 +32,6 @@ class SecurityConfig(
                     .requestMatchers("/api/auth/register").permitAll()
                     .requestMatchers("/api/auth/changePassword").permitAll()
                     // Allow unrestricted access to the Prometheus actuator endpoint
-                    .requestMatchers("/actuator").permitAll()
                     .requestMatchers("/actuator/prometheus").permitAll()
 
                     // TODO: handle other api endpoints based on each role here
