@@ -33,7 +33,7 @@ import java.time.format.DateTimeFormatter
  * @property jwtService The service for handling JWT token-related operations.
  * @property passwordEncoder The password encoder for encoding and decoding passwords.
  */
-//@CrossOrigin(maxAge = 3600)
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping(value = ["/api/auth"])
 class AuthController (
