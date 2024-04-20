@@ -17,7 +17,7 @@ class ClothesController(@Autowired private val clothesRepository: ClothesReposit
     @Autowired private val clothesSizeClothesRepository: ClothesSizeClothesRepository,
     @Autowired private val clothesColorsRepository: ClothesColorsRepository,
     @Autowired private val typeClothesRepository: TypeClothesRepository,
-    @Autowired private  val colorsRepository: ColorRepository,
+    @Autowired private val colorsRepository: ColorRepository,
     @Autowired private val sizeClothesRepository: SizeClothesRepository)  {
     @GetMapping("")
     fun getAllClothes(): List<Clothes> =
