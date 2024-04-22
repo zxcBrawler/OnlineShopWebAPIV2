@@ -104,7 +104,7 @@ class UserController (
                 username = user.username,
                 phoneNumber = user.phoneNumber,
                 profilePhoto = user.profilePhoto,
-                passwordHash = user.passwordHash,
+                passwordHash = userService.setPassword(user.passwordHash),
                 email = user.email,
                 gender = existingGender,
                 role = existingRole,
