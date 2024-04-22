@@ -5,6 +5,7 @@ class UpdateUserDTO {
     var gender = 0
     var email = ""
     var phoneNumber = ""
+    var passwordHash = ""
     var profilePhoto = ""
     var username = ""
     var role = 0

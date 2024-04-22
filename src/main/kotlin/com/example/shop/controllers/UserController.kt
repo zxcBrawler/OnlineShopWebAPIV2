@@ -89,6 +89,7 @@ class UserController (
         // Retrieve the existing user from the repository based on the provided [userId]
         val existingUser = userRepository.findById(userId).orElse(null)
             ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        var updatedUser : User
 
         // Retrieve the existing gender from the repository based on the user's gender ID
         val existingGender = categoryClothesRepository.findById(user.gender.toLong()).orElse(null)
@@ -98,18 +99,31 @@ class UserController (
 
         // Check if the provided password is different from the existing user's password
 
-
+        if (existingRole.roleName == "user") {
+             updatedUser = existingUser.copy(
+                username = user.username,
+                phoneNumber = user.phoneNumber,
+                profilePhoto = user.profilePhoto,
+                passwordHash = user.passwordHash,
+                email = user.email,
+                gender = existingGender,
+                role = existingRole,
+                employeeNumber = user.employeeNumber
+            )
+        }
+        else {
+            updatedUser = existingUser.copy(
+                username = user.username,
+                phoneNumber = user.phoneNumber,
+                profilePhoto = user.profilePhoto,
+                email = user.email,
+                gender = existingGender,
+                role = existingRole,
+                employeeNumber = user.employeeNumber
+            )
+        }
         // Create an updated user object with the new information
-        val updatedUser = existingUser.copy(
-            username = user.username,
 
-            phoneNumber = user.phoneNumber,
-            profilePhoto = user.profilePhoto,
-            email = user.email,
-            gender = existingGender,
-            role = existingRole,
-            employeeNumber = user.employeeNumber
-        )
 
         // Save the updated user to the repository
         userRepository.save(updatedUser)
