@@ -45,7 +45,7 @@ class ShopGarnishController (@Autowired private val shopGarnishRepository: ShopG
 
     @GetMapping("/{colorId}/{sizeId}")
     fun getShopGarnishById(@PathVariable("colorId") colorId: Long, @PathVariable("sizeId") sizeId: Long): ResponseEntity<Any> {
-       val existingShopGarnish = shopGarnishRepository.getShopGarnishBySizeClothesGarnishSizeClothesIdAndColorClothesGarnishId(sizeId, colorId)
+       val existingShopGarnish = shopGarnishRepository.getAllByColorClothesGarnishIdAndSizeClothesGarnishId(sizeId, colorId)
         return ResponseEntity(existingShopGarnish, HttpStatus.OK)
     }
 
