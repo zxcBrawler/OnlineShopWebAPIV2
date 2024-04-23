@@ -53,6 +53,9 @@ class UserOrderController(
     @Autowired private val clothesRepository: ClothesRepository,
     @Autowired private val colorRepository: ColorRepository,
     @Autowired private val sizeClothesRepository: SizeClothesRepository,
+    @Autowired private val shopGarnishRepository: ShopGarnishRepository,
+    @Autowired private val clothesSizeClothesRepository: ClothesSizeClothesRepository,
+    @Autowired private val clothesColorsRepository: ClothesColorsRepository,
     ) {
 
 
@@ -115,6 +118,20 @@ class UserOrderController(
             orderComp.sizeClothes = sizeClothesRepository.findById(clothesQuantity.sizeClothes.sizeClothes.id).orElse(null)  // Size details
             orderCompositionRepository.save(orderComp)  // Save the composition to the repository
             orderComp = OrderComposition()  // Reset OrderComposition for the next iteration
+
+            // Find the size and color of the clothing item to check if it exists
+            val foundSize = clothesSizeClothesRepository.findByClothesIdClothesAndSizeClothesId(clothesQuantity.colorClothesCart.clothes.idClothes,clothesQuantity.sizeClothes.sizeClothes.id)
+            val foundColor = clothesColorsRepository.findByClothesIdClothesAndColorsColorId(clothesQuantity.colorClothesCart.clothes.idClothes,clothesQuantity.colorClothesCart.colors.colorId)
+
+            if (userOrder.typeDelivery.toInt() == 1) {
+                // Find the shop garnish based on size, color, and shop address
+                val foundShopGarnish = shopGarnishRepository.findBySizeClothesGarnishIdAndColorClothesGarnishIdAndShopAddressesGarnishShopAddressId(foundSize.id, foundColor.id, userOrder.shopAddress ?: 1)
+                // Update the quantity of the shop garnish by subtracting the quantity of the clothing item in the cart
+                val newShopGarnish = foundShopGarnish.copy(
+                    quantity = foundShopGarnish.quantity - clothesQuantity.quantity
+                )
+                shopGarnishRepository.save(newShopGarnish)
+            }
         }
 
         // Set user and order details for UserOrder and save it to the repository

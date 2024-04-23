@@ -7,4 +7,6 @@ import org.springframework.data.repository.CrudRepository
 interface ClothesSizeClothesRepository: CrudRepository<ClothesSizeClothes, Long> {
 
     fun findAllByClothesIdClothes (id : Long) : List<ClothesSizeClothes>
+
+    fun findByClothesIdClothesAndSizeClothesId (clothesId : Long, sizeId : Long) : ClothesSizeClothes
 }
