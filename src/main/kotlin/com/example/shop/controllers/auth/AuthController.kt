@@ -2,11 +2,8 @@ package com.example.shop.controllers.auth
 
 import com.example.shop.config.JwtService
 import com.example.shop.models.User
-import com.example.shop.models.dto.LoginDTO
+import com.example.shop.models.dto.*
 
-import com.example.shop.models.dto.LoginResponse
-import com.example.shop.models.dto.Message
-import com.example.shop.models.dto.RegisterDTO
 import com.example.shop.models.logs.UserLogs
 import com.example.shop.repositories.CategoryClothesRepository
 import com.example.shop.repositories.RoleRepository
@@ -94,7 +91,7 @@ class AuthController (
      * @return ResponseEntity<Any> Returns the login response containing user details and JWT token along with an HTTP status.
      */
     @PostMapping("/login")
-    fun login( body: LoginDTO, response: HttpServletResponse) : ResponseEntity<LoginResponse>{
+    fun login(body: LoginDTO, response: HttpServletResponse) : ResponseEntity<LoginResponse>{
         // Create a new login response object
         val loginResponse = LoginResponse()
 
@@ -165,18 +162,17 @@ class AuthController (
      * @return ResponseEntity<Any> Returns a response indicating the status of the password change.
      */
     @PostMapping("/changePassword")
-    fun changePassword(@RequestParam username: String, @RequestParam newPassword: String): ResponseEntity<Any> {
+    fun changePassword(body : ChangePasswordDTO): ResponseEntity<Any> {
         // Find the user by the provided username
-        val userOptional = userService.findByUsername(username)?.orElse(null)
+        val userOptional = userService.findByUsername(body.username)?.orElse(null)
         val userLogs = UserLogs()
         // Check if the user exists
         if (userOptional == null) {
-
-                logger.error("User with username $username has not been found")
+                logger.error("User with username $body.username has not been found")
                 userLogs.user = null
                 userLogs.timestamp = LocalDate.now().toString() + " " +
                         LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                userLogs.description = "User with username $username has not been found"
+                userLogs.description = "User with username $body.username has not been found"
                 userLogsRepository.save(userLogs)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Message("User not found"))
         }
@@ -184,7 +180,7 @@ class AuthController (
         try {
             // Update the user's password and save it to the repository
             val user = userOptional
-            val updatedUser = user.copy(passwordHash = userService.setPassword(newPassword))
+            val updatedUser = user.copy(passwordHash = userService.setPassword(body.newPassword))
             logger.info("New password set for user with username ${updatedUser.username}")
             userLogs.user = updatedUser
             userLogs.timestamp = LocalDate.now().toString() + " " +
@@ -197,11 +193,11 @@ class AuthController (
             return ResponseEntity.ok().build()
         } catch (e: Exception) {
             // Return a response indicating failure to update the password
-            logger.error("Failed to update password for user with username $username")
+            logger.error("Failed to update password for user with username $body.username")
             userLogs.user = null
             userLogs.timestamp = LocalDate.now().toString() + " " +
                     LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-            userLogs.description = "Failed to update password for user with username $username"
+            userLogs.description = "Failed to update password for user with username $body.username"
             userLogsRepository.save(userLogs)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Message("Failed to update password"))
         }
